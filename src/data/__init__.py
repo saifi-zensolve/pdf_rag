@@ -1,0 +1,1 @@
+from src.data.pdf_document_reader import load_pdf_document as load_pdf_document
