@@ -26,9 +26,13 @@ async def test_endpoint() -> dict:
     documents = load_pdf_document(path)
     documents = documents[:10]  # Limit to first 10 documents for testing
 
-    embeddings = get_embeddings(embedding_provider="free")  # Just to test embedding loading
-    store = get_store(embedding=embeddings)
-    store.add_documents(documents)
+    # embeddings = get_embeddings(embedding_provider="free")
+    # store = get_store(embedding=embeddings, store_type="qdrant", dimensions=384)
+
+    embeddings = get_embeddings(embedding_provider="free-slow")
+    store = get_store(embedding=embeddings, store_type="qdrant", dimensions=768)
+
+    # store.add_documents(documents)
 
     result = store.similarity_search("What is Renters Insurance?", k=3)
 
