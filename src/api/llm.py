@@ -1,6 +1,6 @@
-import os
-
 from fastapi import APIRouter
+
+from src.app import call_rag as rag
 
 router = APIRouter(prefix="/api/v1")
 
@@ -18,22 +18,4 @@ async def invoke_gpt_example() -> dict:
 
 @router.get("/test")
 async def test_endpoint() -> dict:
-    from src.data import load_pdf_document
-    from src.embedding import get_embeddings
-    from src.store import get_store
-
-    path = os.getenv("DOCUMENTS_PATH", "./documents")
-    documents = load_pdf_document(path)
-    documents = documents[:10]  # Limit to first 10 documents for testing
-
-    # embeddings = get_embeddings(embedding_provider="free")
-    # store = get_store(embedding=embeddings, store_type="qdrant", dimensions=384)
-
-    embeddings = get_embeddings(embedding_provider="free-slow")
-    store = get_store(embedding=embeddings, store_type="qdrant", dimensions=768)
-
-    # store.add_documents(documents)
-
-    result = store.similarity_search("What is Renters Insurance?", k=3)
-
-    return {"results": [{"content": r.page_content, "metadata": r.metadata} for r in result]}
+    return rag()
