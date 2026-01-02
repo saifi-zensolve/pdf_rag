@@ -1,0 +1,1 @@
+from src.pipeline.loader.pdf_document_reader import load_pdf_document as load_pdf_document

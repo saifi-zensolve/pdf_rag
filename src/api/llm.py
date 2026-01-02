@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from src.app import call_rag as rag
+from src.pipeline.app import call_rag as rag
 
 router = APIRouter(prefix="/api/v1")
 

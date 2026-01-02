@@ -1,9 +1,12 @@
+import os
+
 from langchain_community.document_loaders import DirectoryLoader, PyMuPDFLoader
 from langchain_core.documents import Document
 
 
 def load_pdf_document(file_path: str) -> list[Document]:
-    """Load a PDF document and return its content as a list of Document objects.
+    """Load all PDF files in a directory and convert them to LangChain Document objects. Add the source file name to each metadata key.
+
     Args:
         file_path (str): The path to the PDF file.
     Returns:
@@ -11,4 +14,8 @@ def load_pdf_document(file_path: str) -> list[Document]:
     """
     loader = DirectoryLoader(path=file_path, loader_cls=PyMuPDFLoader, glob="**/*.pdf")
     documents = loader.load()
+
+    for document in documents:
+        document.metadata["source_file"] = os.path.basename(document.metadata.get("source", ""))
+
     return documents
