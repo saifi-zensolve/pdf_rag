@@ -9,7 +9,14 @@ from src.pipeline.splitter import split_documents
 from src.pipeline.store import get_store
 
 
-def ingest(path: str) -> dict:
+def ingest_pipeline(path: str) -> dict:
+    """Ingest a PDF document and store its embeddings.
+
+    Args:
+        path (str): The path to the PDF document
+    Returns:
+        dict: A dictionary containing the status of the ingestion process.
+    """
     # Step 1: Load the PDF documents
     documents = load_pdf_document(path)
 
@@ -53,10 +60,4 @@ def ingest(path: str) -> dict:
     store = get_store(embedding=embeddings, store_type="qdrant", dimensions=EMBEDDING_DIMENSION)
     store.add_texts(texts, metadatas, ids=hash_ids)
 
-    return {"message": "Ingestion completed successfully."}
-
-
-def ingest_through_api(paths: list[str]) -> dict:
-    for path in paths:
-        print(f"Processing file: {path}")
-        ingest(path=path)
+    return {"status": "success", "path": path}
