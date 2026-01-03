@@ -9,9 +9,8 @@ from src.pipeline.splitter import split_documents
 from src.pipeline.store import get_store
 
 
-def call_rag() -> dict:
+def ingest(path: str) -> dict:
     # Step 1: Load the PDF documents
-    path = os.getenv("DOCUMENTS_PATH", "./documents")
     documents = load_pdf_document(path)
 
     # Step 2: Chunk the text into smaller chunks (e.g., sentences)
@@ -54,6 +53,10 @@ def call_rag() -> dict:
     store = get_store(embedding=embeddings, store_type="qdrant", dimensions=EMBEDDING_DIMENSION)
     store.add_texts(texts, metadatas, ids=hash_ids)
 
-    result = store.similarity_search("What is Renters Insurance?", k=3)
+    return {"message": "Ingestion completed successfully."}
 
-    return {"response": result}
+
+def ingest_through_api(paths: list[str]) -> dict:
+    for path in paths:
+        print(f"Processing file: {path}")
+        ingest(path=path)
