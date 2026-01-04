@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from src.pipeline.app import call_rag as rag
+from src.rag.graph import main
 
 router = APIRouter(prefix="/api/v1")
 
@@ -18,4 +18,5 @@ async def invoke_gpt_example() -> dict:
 
 @router.get("/test")
 async def test_endpoint() -> dict:
-    return rag()
+    main()
+    return {"status": "ok"}

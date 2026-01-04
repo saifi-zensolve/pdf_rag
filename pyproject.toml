@@ -11,6 +11,7 @@ dependencies = [
     "langchain-huggingface>=1.2.0",
     "langchain-openai>=1.1.6",
     "langchain-qdrant>=1.1.0",
+    "langgraph>=1.0.5",
     "passlib[bcrypt]>=1.7.4",
     "pymupdf>=1.26.7",
     "python-dotenv>=1.2.1",
