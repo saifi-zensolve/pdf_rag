@@ -6,6 +6,7 @@ from langgraph.graph import StateGraph
 from src.llm.gpt_41_mini import GPT_4_1_Mini
 from src.pipeline.embedding import get_embeddings
 from src.pipeline.store import get_store
+from src.rag.model import ChatRequest
 
 
 class State(TypedDict):
@@ -86,8 +87,7 @@ def post_guardrail_node(state: State):
     return {"answer": state["answer"]}
 
 
-def main():
-    print("main")
+def main(request: ChatRequest) -> dict:
     graph = StateGraph(State)
 
     graph.add_node("retrieve_node", retrieve_node)
@@ -104,7 +104,11 @@ def main():
 
     app = graph.compile()
 
-    response = app.invoke({"question": "What is Homeowners in Insurance?"})
+    response = app.invoke({"question": request["question"]})
 
-    print(response["answer"])
-    pass
+    return {
+        "status": "success",
+        "question": request["question"],
+        "answer": response["answer"],
+        "history": [],
+    }
