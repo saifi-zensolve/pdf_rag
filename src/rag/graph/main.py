@@ -6,7 +6,6 @@ from langgraph.graph import StateGraph
 from src.llm.gpt_41_mini import GPT_4_1_Mini
 from src.pipeline.embedding import get_embeddings
 from src.pipeline.store import get_store
-from src.rag.model import ChatRequest
 
 
 class State(TypedDict):
@@ -15,6 +14,7 @@ class State(TypedDict):
     filtered_docs: list[Document]
     prompt: str
     answer: str
+    history: list[dict[str, str]]
 
 
 embeddings = get_embeddings("free-slow")
@@ -60,9 +60,17 @@ def pre_guardrail_node(state: State):
 def prompt_node(state: State):
     context = "\n\n---\n\n".join(document.page_content for document in state["filtered_docs"])
 
+    history_text = "\n\n---\n\n".join(
+        f"{message['role'].capitalize()}:{message['content']}"
+        for message in state.get("history", [])
+    )
+
     prompt = f"""
 You are a helpful insurance expert.
-Answer the question using ONLY the context below.
+Answer the question using ONLY the context below. If you are unsure, say "I don't know". 
+
+CONVERSATION:
+{history_text}
 
 CONTEXT:
 {context}
@@ -70,13 +78,20 @@ CONTEXT:
 QUESTION:
 {state["question"]}
 """
-    print(f"prompt: {prompt}")
+
     return {"prompt": prompt}
 
 
 def llm_node(state: State):
     response = GPT_4_1_Mini().invoke_llm(state["prompt"])
-    return {"answer": response["content"]}
+    answer = response["content"]
+
+    history = list(state.get("history", []))
+
+    history.append({"role": "user", "content": state["question"]})
+    history.append({"role": "assistant", "content": answer})
+
+    return {"answer": answer, "history": history}
 
 
 def post_guardrail_node(state: State):
@@ -87,7 +102,7 @@ def post_guardrail_node(state: State):
     return {"answer": state["answer"]}
 
 
-def main(request: ChatRequest) -> dict:
+def main(request: dict) -> dict:
     graph = StateGraph(State)
 
     graph.add_node("retrieve_node", retrieve_node)
@@ -104,11 +119,11 @@ def main(request: ChatRequest) -> dict:
 
     app = graph.compile()
 
-    response = app.invoke({"question": request["question"]})
+    response = app.invoke({"question": request["question"], "history": request.get("history", [])})
 
     return {
         "status": "success",
         "question": request["question"],
         "answer": response["answer"],
-        "history": [],
+        "history": response["history"],
     }
