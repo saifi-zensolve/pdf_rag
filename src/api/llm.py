@@ -24,7 +24,7 @@ async def invoke_gpt_example() -> dict:
 
 @router.get("/ask")
 async def ask_question(question: str) -> dict:
-    return rag_main(question=question)
+    return rag_main({"question": question, "history": []})
 
 
 @router.post("/chat", response_model=ChatResponse)

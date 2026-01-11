@@ -2,7 +2,10 @@ import os
 
 from fastapi import APIRouter, BackgroundTasks, UploadFile
 
+from src.logger import init_logger
 from src.pipeline import ingest_pipeline
+
+logger = init_logger(__name__)
 
 router = APIRouter(prefix="/api/v1")
 
@@ -31,6 +34,16 @@ async def ingest_files(files: list[UploadFile], bg: BackgroundTasks) -> dict:
 
 
 @router.get("/trigger")
-async def trigger_ingestion() -> dict:
-    ingest_pipeline(os.getenv("DOCUMENTS_PATH") or "")
+async def trigger_ingestion(bg: BackgroundTasks) -> dict:
+    """Trigger ingestion of all documents.
+
+    Allows to manually trigger the ingestion process, which is useful for testing purposes.
+    This endpoint should be used with caution as it can cause a significant load on the system.
+
+    Returns:
+        dict: A JSON response indicating that ingestion has been triggered.
+    """
+
+    logger.info("Triggering ingestion of all documents.")
+    bg.add_task(ingest_pipeline, os.getenv("DOCUMENTS_PATH") or "")
     return {"status": "triggered"}

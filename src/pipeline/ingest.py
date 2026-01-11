@@ -1,12 +1,19 @@
 import os
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
+from langchain_core.documents import Document
+from tqdm import tqdm
+
+from src.logger import init_logger
 from src.pipeline.config import EMBEDDING_DIMENSION, EMBEDDING_VERSION
 from src.pipeline.embedding import get_embeddings
 from src.pipeline.identifier import generate_chunk_id
 from src.pipeline.loader import load_csv_document, load_pdf_document
 from src.pipeline.splitter import split_documents
 from src.pipeline.store import get_store
+
+logger = init_logger(__name__)
 
 
 def __load_all_documents(path: str) -> dict:
@@ -25,33 +32,28 @@ def __load_all_documents(path: str) -> dict:
     return documents
 
 
-def ingest_pipeline(path: str) -> dict:
-    """Ingest a PDF document and store its embeddings.
+def __process_chunks(chunks: list[Document]) -> None:
+    chunk_batches = list(create_batch(chunks=chunks))
 
-    Args:
-        path (str): The path to the PDF document
-    Returns:
-        dict: A dictionary containing the status of the ingestion process.
-    """
-    # Step 1: Load the documents
-    documents = __load_all_documents(path=path)
+    with ThreadPoolExecutor(max_workers=5) as ex:
+        futures = [ex.submit(thread_worker, chunk_batch) for chunk_batch in chunk_batches]
+        for _ in tqdm(as_completed(futures), total=len(futures), desc="Embedded and Store: "):
+            pass
 
-    # Step 2: Chunk the text into smaller chunks (e.g., sentences)
-    chunks = split_documents(documents)
 
-    chunks = chunks[:1000]
-
+def thread_worker(chunk_batch: list[Document]) -> None:
     # Step 3: Embed each chunk using a vector store embedding model
-    embeddings = get_embeddings(embedding_provider="free-slow")
+    embedder = get_embeddings(embedding_provider="free-slow")
+    store = get_store(embedding=embedder, store_type="qdrant", dimensions=EMBEDDING_DIMENSION)
 
-    texts = [chunk.page_content for chunk in chunks]
-    metadatas = [chunk.metadata for chunk in chunks]
+    texts = [chunk.page_content for chunk in chunk_batch]
+    metadatas = [chunk.metadata for chunk in chunk_batch]
 
     # Step 4: Generate deterministic ids for each chunk
     hash_ids = []
     doc_counter = defaultdict(int)
 
-    for chunk in chunks:
+    for chunk in chunk_batch:
         source = chunk.metadata.get("source_file")
         page = chunk.metadata.get("page", -1)
 
@@ -75,7 +77,32 @@ def ingest_pipeline(path: str) -> dict:
         hash_ids.append(chunk_id)
 
     # Step 5: Store the embeddings and metadata in the vector store
-    store = get_store(embedding=embeddings, store_type="qdrant", dimensions=EMBEDDING_DIMENSION)
     store.add_texts(texts, metadatas, ids=hash_ids)
+
+
+def create_batch(chunks: list[Document], size: int = 256):
+    for i in range(0, len(chunks), size):
+        yield chunks[i : i + size]
+
+
+def ingest_pipeline(path: str) -> dict:
+    """Ingest a PDF document and store its embeddings.
+
+    Args:
+        path (str): The path to the PDF document
+    Returns:
+        dict: A dictionary containing the status of the ingestion process.
+    """
+    logger.info(f"Loading documents from {path}")
+    # Step 1: Load the documents
+    documents = __load_all_documents(path=path)
+    logger.info(f"Found {len(documents)} documents")
+
+    logger.info("Splitting documents into smaller chunks")
+    # Step 2: Chunk the text into smaller chunks (e.g., sentences)
+    chunks = split_documents(documents)
+    logger.info(f"Found {len(chunks)} chunks")
+
+    __process_chunks(chunks=chunks)
 
     return {"status": "success", "path": path}

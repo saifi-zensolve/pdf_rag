@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "colorlog>=6.10.1",
     "fastapi[standard]>=0.128.0",
     "langchain>=1.2.0",
     "langchain-community>=0.4.1",
@@ -17,6 +18,7 @@ dependencies = [
     "python-dotenv>=1.2.1",
     "python-jose[cryptography]>=3.5.0",
     "sentence-transformers>=5.2.0",
+    "tqdm>=4.67.1",
 ]
 
 [dependency-groups]

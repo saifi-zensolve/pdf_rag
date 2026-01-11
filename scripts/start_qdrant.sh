@@ -35,7 +35,7 @@ docker run -d \
   --name ${QDRANT_NAME} \
   -p 6333:6333 \
   -p 6334:6334 \
-  -v "$(pwd)/qdrant_data:/qdrant/storage" \
+  -v "$(pwd)/DO_NOT_COMMIT/qdrant_data:/qdrant/storage" \
   qdrant/qdrant
 
 echo "✅ Qdrant started"

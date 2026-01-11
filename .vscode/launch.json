@@ -15,7 +15,9 @@
       "preLaunchTask": "Start Qdrant",
       "postDebugTask": "Stop Qdrant",
       "env": {
-        "QDRANT_URL": "http://localhost:6333"
+        "QDRANT_URL": "http://localhost:6333",
+        "LOG_LEVEL": "DEBUG",
+        "ENVIRONMENT": "DEV"
       },
       "jinja": true
     }
