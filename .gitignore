@@ -12,3 +12,4 @@ wheels/
 /data_store
 /DO_NOT_COMMIT
 .DS_Store
+.ruff_cache
