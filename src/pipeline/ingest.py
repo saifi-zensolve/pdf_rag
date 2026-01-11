@@ -35,7 +35,7 @@ def __load_all_documents(path: str) -> dict:
 def __process_chunks(chunks: list[Document]) -> None:
     chunk_batches = list(create_batch(chunks=chunks))
 
-    with ThreadPoolExecutor(max_workers=5) as ex:
+    with ThreadPoolExecutor(max_workers=8) as ex:
         futures = [ex.submit(thread_worker, chunk_batch) for chunk_batch in chunk_batches]
         for _ in tqdm(as_completed(futures), total=len(futures), desc="Embedded and Store: "):
             pass
@@ -80,7 +80,7 @@ def thread_worker(chunk_batch: list[Document]) -> None:
     store.add_texts(texts, metadatas, ids=hash_ids)
 
 
-def create_batch(chunks: list[Document], size: int = 256):
+def create_batch(chunks: list[Document], size: int = 96):
     for i in range(0, len(chunks), size):
         yield chunks[i : i + size]
 
