@@ -4,9 +4,25 @@ from collections import defaultdict
 from src.pipeline.config import EMBEDDING_DIMENSION, EMBEDDING_VERSION
 from src.pipeline.embedding import get_embeddings
 from src.pipeline.identifier import generate_chunk_id
-from src.pipeline.loader import load_pdf_document
+from src.pipeline.loader import load_csv_document, load_pdf_document
 from src.pipeline.splitter import split_documents
 from src.pipeline.store import get_store
+
+
+def __load_all_documents(path: str) -> dict:
+    """Load all documents from a given path.
+
+    Args:
+       path (str): The path to the directory where the documents are stored.
+    Returns:
+       list[dict]: A list of dictionaries, where each dictionary represents a document and contains information about its metadata.
+    """
+    pdf_documents = load_pdf_document(path)
+    csv_documents = load_csv_document(path)
+
+    documents = pdf_documents + csv_documents
+
+    return documents
 
 
 def ingest_pipeline(path: str) -> dict:
@@ -17,11 +33,13 @@ def ingest_pipeline(path: str) -> dict:
     Returns:
         dict: A dictionary containing the status of the ingestion process.
     """
-    # Step 1: Load the PDF documents
-    documents = load_pdf_document(path)
+    # Step 1: Load the documents
+    documents = __load_all_documents(path=path)
 
     # Step 2: Chunk the text into smaller chunks (e.g., sentences)
     chunks = split_documents(documents)
+
+    chunks = chunks[:1000]
 
     # Step 3: Embed each chunk using a vector store embedding model
     embeddings = get_embeddings(embedding_provider="free-slow")

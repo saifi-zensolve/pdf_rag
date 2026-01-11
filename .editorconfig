@@ -1,0 +1,67 @@
+# Top-level EditorConfig file
+root = true
+
+# ================================
+# Global Defaults
+# ================================
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+# ================================
+# Python
+# ================================
+[*.py]
+indent_size = 4
+max_line_length = 120
+
+# Ruff + Black compatibility
+quote_type = double
+
+# ================================
+# Markdown
+# ================================
+[*.md]
+max_line_length = 100
+trim_trailing_whitespace = false
+
+# ================================
+# YAML / YML
+# ================================
+[*.{yml,yaml}]
+indent_size = 2
+
+# ================================
+# JSON
+# ================================
+[*.json]
+indent_size = 2
+
+# ================================
+# Shell
+# ================================
+[*.sh]
+indent_size = 2
+
+# ================================
+# TOML (pyproject.toml)
+# ================================
+[*.toml]
+indent_size = 2
+
+# ================================
+# Dockerfile
+# ================================
+[Dockerfile]
+indent_size = 2
+
+# ================================
+# VSCode files
+# ================================
+[*.{code-workspace,vsixmanifest}]
+indent_size = 2

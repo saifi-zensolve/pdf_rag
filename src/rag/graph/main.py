@@ -61,8 +61,7 @@ def prompt_node(state: State):
     context = "\n\n---\n\n".join(document.page_content for document in state["filtered_docs"])
 
     history_text = "\n\n---\n\n".join(
-        f"{message['role'].capitalize()}:{message['content']}"
-        for message in state.get("history", [])
+        f"{message['role'].capitalize()}:{message['content']}" for message in state.get("history", [])
     )
 
     prompt = f"""

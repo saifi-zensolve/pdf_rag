@@ -12,6 +12,11 @@
         "--host", "127.0.0.1",
         "--port", "8000"
       ],
+      "preLaunchTask": "Start Qdrant",
+      "postDebugTask": "Stop Qdrant",
+      "env": {
+        "QDRANT_URL": "http://localhost:6333"
+      },
       "jinja": true
     }
   ]

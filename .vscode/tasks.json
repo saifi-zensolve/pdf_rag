@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start Qdrant",
+            "type": "shell",
+            "command": "${workspaceFolder}/scripts/start_qdrant.sh",
+            "problemMatcher": []
+        },
+        {
+            "label": "Stop Qdrant",
+            "type": "shell",
+            "command": "${workspaceFolder}/scripts/stop_qdrant.sh",
+            "problemMatcher": []
+        }
+    ]
+}

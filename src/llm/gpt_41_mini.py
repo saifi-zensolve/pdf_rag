@@ -40,15 +40,17 @@ class GPT_4_1_Mini:
 
             token_usage = response.response_metadata.get("token_usage", {})
             input_tokens = token_usage.get("input_tokens") or token_usage.get("prompt_tokens") or 0
-            output_tokens = (
-                token_usage.get("output_tokens") or token_usage.get("completion_tokens") or 0
-            )
+            output_tokens = token_usage.get("output_tokens") or token_usage.get("completion_tokens") or 0
             total_tokens = token_usage.get("total_tokens", input_tokens + output_tokens)
 
             return {
                 "message": response,
                 "content": response.content,
-                "usage": {"input": input_tokens, "output": output_tokens, "total": total_tokens},
+                "usage": {
+                    "input": input_tokens,
+                    "output": output_tokens,
+                    "total": total_tokens,
+                },
             }
         except Exception as e:
             raise RuntimeError(f"Failed to invoke LLM: {e}") from e

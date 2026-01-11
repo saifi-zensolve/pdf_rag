@@ -10,9 +10,7 @@ def split_documents(documents: list[Document]) -> list[Document]:
     Returns:
         chunks (list[Document]): A list of langchain.Document objects.
     """
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=800, chunk_overlap=120, add_start_index=True
-    )
+    splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=120, add_start_index=True)
     chunks = splitter.split_documents(documents)
     print(f"From {len(documents)} documents to {len(chunks)} chunks")
     return chunks
