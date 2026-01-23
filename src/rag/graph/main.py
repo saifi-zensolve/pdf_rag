@@ -4,8 +4,12 @@ from langchain_core.documents import Document
 from langgraph.graph import StateGraph
 
 from src.llm.gpt_41_mini import GPT_4_1_Mini
+from src.logger import init_logger
+from src.pipeline.config import EMBEDDING_DIMENSION
 from src.pipeline.embedding import get_embeddings
 from src.pipeline.store import get_store
+
+logger = init_logger(__name__)
 
 
 class State(TypedDict):
@@ -17,8 +21,8 @@ class State(TypedDict):
     history: list[dict[str, str]]
 
 
-embeddings = get_embeddings("free-slow")
-retriever = get_store(embedding=embeddings, store_type="qdrant", dimensions=768).as_retriever(k=3)
+embeddings = get_embeddings()
+retriever = get_store(embedding=embeddings, store_type="qdrant", dimensions=EMBEDDING_DIMENSION).as_retriever(k=3)
 
 
 def retrieve_node(state: State):

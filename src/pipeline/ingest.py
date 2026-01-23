@@ -43,7 +43,7 @@ def __process_chunks(chunks: list[Document]) -> None:
 
 def thread_worker(chunk_batch: list[Document]) -> None:
     # Step 3: Embed each chunk using a vector store embedding model
-    embedder = get_embeddings(embedding_provider="free-slow")
+    embedder = get_embeddings()
     store = get_store(embedding=embedder, store_type="qdrant", dimensions=EMBEDDING_DIMENSION)
 
     texts = [chunk.page_content for chunk in chunk_batch]
@@ -80,7 +80,7 @@ def thread_worker(chunk_batch: list[Document]) -> None:
     store.add_texts(texts, metadatas, ids=hash_ids)
 
 
-def create_batch(chunks: list[Document], size: int = 96):
+def create_batch(chunks: list[Document], size: int = 128):
     for i in range(0, len(chunks), size):
         yield chunks[i : i + size]
 
