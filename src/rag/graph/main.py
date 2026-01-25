@@ -1,28 +1,18 @@
-from typing import TypedDict
-
-from langchain_core.documents import Document
 from langgraph.graph import StateGraph
+from langgraph.graph.state import CompiledStateGraph
 
 from src.llm.gpt_41_mini import GPT_4_1_Mini
 from src.logger import init_logger
 from src.pipeline.config import EMBEDDING_DIMENSION
 from src.pipeline.embedding import get_embeddings
 from src.pipeline.store import get_store
+from src.rag.state import State
 
 logger = init_logger(__name__)
 
 
-class State(TypedDict):
-    question: str
-    docs: list[Document]
-    filtered_docs: list[Document]
-    prompt: str
-    answer: str
-    history: list[dict[str, str]]
-
-
-embeddings = get_embeddings()
-retriever = get_store(embedding=embeddings, store_type="qdrant", dimensions=EMBEDDING_DIMENSION).as_retriever(k=3)
+_embeddings = get_embeddings()
+retriever = get_store(embedding=_embeddings, store_type="qdrant", dimensions=EMBEDDING_DIMENSION).as_retriever(k=3)
 
 
 def retrieve_node(state: State):
@@ -105,7 +95,8 @@ def post_guardrail_node(state: State):
     return {"answer": state["answer"]}
 
 
-def main(request: dict) -> dict:
+def build_graph() -> CompiledStateGraph:
+    """Build the state graph."""
     graph = StateGraph(State)
 
     graph.add_node("retrieve_node", retrieve_node)
@@ -120,7 +111,11 @@ def main(request: dict) -> dict:
     graph.add_edge("prompt_node", "llm_node")
     graph.add_edge("llm_node", "post_guardrail_node")
 
-    app = graph.compile()
+    return graph.compile()
+
+
+def main(request: dict) -> dict:
+    app = build_graph()
 
     response = app.invoke({"question": request["question"], "history": request.get("history", [])})
 

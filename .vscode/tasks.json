@@ -2,16 +2,44 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Start Qdrant",
+            "label": "start-qdrant",
             "type": "shell",
             "command": "${workspaceFolder}/scripts/start_qdrant.sh",
             "problemMatcher": []
         },
         {
-            "label": "Stop Qdrant",
+            "label": "stop-qdrant",
             "type": "shell",
             "command": "${workspaceFolder}/scripts/stop_qdrant.sh",
             "problemMatcher": []
+        },
+        {
+            "label": "start-oracle",
+            "type": "shell",
+            "command": "${workspaceFolder}/start_oracle.sh",
+            "problemMatcher": []
+        },
+        {
+            "label": "stop-oracle",
+            "type": "shell",
+            "command": "${workspaceFolder}/stop_oracle.sh",
+            "problemMatcher": []
+        },
+        {
+            "label": "start-dependencies",
+            "dependsOn": [
+                "start-oracle",
+                "start-qdrant"
+            ],
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "stop-dependencies",
+            "dependsOn": [
+                "stop-oracle",
+                "stop-qdrant"
+            ],
+            "dependsOrder": "sequence"
         }
     ]
 }
