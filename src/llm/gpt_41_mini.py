@@ -33,9 +33,26 @@ class GPT_4_1_Mini:
 
             self._initialized = True
 
-    def invoke_llm(self, message: list[any]) -> any:
-        """Invoke the LLM with the provided message."""
+    def invoke_llm(
+        self,
+        message: list[any],
+        response_format: dict | None = None,
+    ) -> any:
+        """Invoke the LLM with a given message and optional response format.
+
+        Args:
+           message (list[any]): The message to send to the LLM.
+           response_format (dict | None): The format of the LLM's response. Defaults to None.
+
+        Returns:
+           any: The LLM's response.
+        """
         try:
+            llm = self.llm
+
+            if response_format:
+                llm = llm.bind(model_kwargs={"response_format": response_format})
+
             response = self.llm.invoke(message)
 
             token_usage = response.response_metadata.get("token_usage", {})
