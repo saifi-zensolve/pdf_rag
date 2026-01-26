@@ -53,7 +53,7 @@ class GPT_4_1_Mini:
             if response_format:
                 llm = llm.bind(model_kwargs={"response_format": response_format})
 
-            response = self.llm.invoke(message)
+            response = llm.invoke(message)
 
             token_usage = response.response_metadata.get("token_usage", {})
             input_tokens = token_usage.get("input_tokens") or token_usage.get("prompt_tokens") or 0
