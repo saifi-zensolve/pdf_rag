@@ -8,7 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
-.env
+.env*
 /data_store
 /DO_NOT_COMMIT
 .DS_Store

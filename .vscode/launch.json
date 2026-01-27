@@ -12,13 +12,9 @@
         "--host", "127.0.0.1",
         "--port", "8000"
       ],
+      "envFile": "${workspaceFolder}/.env.launch",
       "preLaunchTask": "start-dependencies",
       "postDebugTask": "stop-dependencies",
-      "env": {
-        "QDRANT_URL": "http://localhost:6333",
-        "LOG_LEVEL": "DEBUG",
-        "ENVIRONMENT": "DEV"
-      },
       "jinja": true
     }
   ]

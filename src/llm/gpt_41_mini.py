@@ -51,7 +51,7 @@ class GPT_4_1_Mini:
             llm = self.llm
 
             if response_format:
-                llm = llm.bind(model_kwargs={"response_format": response_format})
+                llm = llm.bind(response_format={"type": "json_object"})
 
             response = llm.invoke(message)
 

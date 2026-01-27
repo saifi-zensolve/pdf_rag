@@ -8,6 +8,16 @@ if [ -z "$ORACLE_PASSWORD" ]; then
   exit 1
 fi
 
+if ! docker info >/dev/null 2>&1; then
+  echo "🐳 Starting Docker..."
+  open -a Docker
+  while ! docker info >/dev/null 2>&1; do
+    sleep 1
+  done
+fi
+
+echo "🐳 Docker is running..."
+
 # Check if container is already running
 if docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
   echo "✅ Oracle XE already running"

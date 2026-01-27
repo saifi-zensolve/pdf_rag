@@ -1,4 +1,4 @@
-from src.rag.intent import classify_intent
+from src.rag.intent import Intent, IntentClassifier
 
 test_questions = [
     "What is the status of my claim?",
@@ -9,10 +9,27 @@ test_questions = [
 ]
 
 
-def test_intents():
-    for q in test_questions:
-        result = classify_intent(q)
-        print("-" * 50)
-        print(f"Question   : {q}")
-        print(f"Intent     : {result.intent}")
-        print(f"Confidence : {result.confidence}")
+def test_intents_claim_status():
+    q = "What is the status of my claim?"
+
+    result = IntentClassifier().classify(question=q)
+
+    print(f"Question   : {q}")
+    print(f"Intent     : {result.intent}")
+    print(f"Confidence : {result.confidence}")
+
+    assert result.intent == Intent.CLAIM_STATUS
+    assert result.confidence >= 0.7
+
+
+# def test_intents_unknown():
+#     q = "Give me all customer data"
+
+#     result = IntentClassifier().classify(question=q)
+
+#     print(f"Question   : {q}")
+#     print(f"Intent     : {result.intent}")
+#     print(f"Confidence : {result.confidence}")
+
+#     assert result.intent == Intent.UNKNOWN
+#     assert result.confidence == 0.0

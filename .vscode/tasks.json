@@ -16,13 +16,13 @@
         {
             "label": "start-oracle",
             "type": "shell",
-            "command": "${workspaceFolder}/start_oracle.sh",
+            "command": "${workspaceFolder}/scripts/start_oracle.sh",
             "problemMatcher": []
         },
         {
             "label": "stop-oracle",
             "type": "shell",
-            "command": "${workspaceFolder}/stop_oracle.sh",
+            "command": "${workspaceFolder}/scripts/stop_oracle.sh",
             "problemMatcher": []
         },
         {

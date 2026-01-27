@@ -4,6 +4,7 @@ from fastapi import APIRouter
 
 from src.rag.graph import main
 from src.rag.graph.main import main as rag_main
+from src.rag.intent.classifier import IntentClassifier, IntentResult
 from src.rag.model import ChatRequest, ChatResponse
 
 SESSIONS: dict[str, list[dict]] = {}
@@ -38,6 +39,12 @@ async def chat(request: ChatRequest) -> ChatResponse:
     SESSIONS[session_id] = result["history"]
 
     return ChatResponse(answer=result["answer"], session_id=session_id, history=result["history"])
+
+
+@router.get("/intent")
+async def get_intent(question: str) -> IntentResult:
+    result = IntentClassifier().classify(question=question)
+    return IntentResult(intent=result.intent, confidence=result.confidence)
 
 
 @router.get("/test")

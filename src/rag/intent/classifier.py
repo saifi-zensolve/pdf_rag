@@ -4,8 +4,6 @@ from typing import NamedTuple
 
 from src.llm.gpt_41_mini import GPT_4_1_Mini
 
-_llm = GPT_4_1_Mini()
-
 
 class Intent(Enum):
     CLAIM_STATUS = "CLAIM_STATUS"
@@ -22,10 +20,15 @@ class IntentResult(NamedTuple):
 
 ALLOWED_INTENTS = {i.value for i in Intent if i != Intent.UNKNOWN}
 CONFIDENCE_THRESHOLD = 0.7
+INTENT_SCHEMA = {"type": "json_object"}
 
 
-def classify_intent(question: str) -> IntentResult:
-    prompt = f"""
+class IntentClassifier:
+    def __init__(self):
+        self._llm = GPT_4_1_Mini()
+
+    def classify(self, question: str):
+        prompt = f"""
 You are an intent classifier for an insurance chatbot.
 
 Choose exactly ONE intent from this list:
@@ -45,22 +48,22 @@ OUTPUT FORMAT:
 QUESTION:
 "{question}"
 """
-    raw = _llm.invoke_llm(
-        prompt,
-        response_format={"type": "json_object"},
-    )
+        raw = self._llm.invoke_llm(
+            prompt,
+            response_format=INTENT_SCHEMA,
+        )
 
-    try:
-        data = json.loads(raw["content"])
-        intent = data.get("intent")
-        confidence = float(data.get("confidence", 0.0))
+        try:
+            data = json.loads(raw["content"])
+            intent = data.get("intent")
+            confidence = float(data.get("confidence", 0.0))
 
-        if intent not in ALLOWED_INTENTS:
+            if intent not in ALLOWED_INTENTS:
+                return IntentResult(Intent.UNKNOWN, 0.0)
+
+            if confidence < CONFIDENCE_THRESHOLD:
+                return IntentResult(Intent.UNKNOWN, confidence)
+
+            return IntentResult(intent, confidence)
+        except Exception:
             return IntentResult(Intent.UNKNOWN, 0.0)
-
-        if confidence < CONFIDENCE_THRESHOLD:
-            return IntentResult(Intent.UNKNOWN, confidence)
-
-        return IntentResult(intent, confidence)
-    except Exception:
-        return IntentResult(Intent.UNKNOWN, 0.0)
