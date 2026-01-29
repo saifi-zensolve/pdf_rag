@@ -2,7 +2,7 @@ import json
 from enum import Enum
 from typing import NamedTuple
 
-from src.llm.gpt_41_mini import GPT_4_1_Mini
+from src.llm.qwen3 import Qwen3
 
 
 class Intent(Enum):
@@ -25,7 +25,7 @@ INTENT_SCHEMA = {"type": "json_object"}
 
 class IntentClassifier:
     def __init__(self):
-        self._llm = GPT_4_1_Mini()
+        self._llm = Qwen3()
 
     def classify(self, question: str):
         prompt = f"""
@@ -64,6 +64,6 @@ QUESTION:
             if confidence < CONFIDENCE_THRESHOLD:
                 return IntentResult(Intent.UNKNOWN, confidence)
 
-            return IntentResult(intent, confidence)
+            return IntentResult(Intent(intent), float(confidence))
         except Exception:
             return IntentResult(Intent.UNKNOWN, 0.0)
