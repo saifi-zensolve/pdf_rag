@@ -2,6 +2,8 @@ from typing import TypedDict
 
 from langchain_core.documents import Document
 
+from src.rag.intent.classifier import Intent
+
 
 class State(TypedDict, total=False):
     """Type definition for the state of the chatbot.
@@ -14,6 +16,8 @@ class State(TypedDict, total=False):
         answer (str): The response from the chatbot.
         history (list[dict[str, str]]): A list of previous user inputs and chatbot responses in the form of a dictionary.
         error (str): An error message if an exception occurs during the chatbot's execution.
+        intent (Intent): The intent of the user's input.
+        intent_confidence (float): The confidence level of the intent of the user's input.
     """
 
     question: str
@@ -23,3 +27,5 @@ class State(TypedDict, total=False):
     answer: str
     history: list[dict[str, str]]
     error: str
+    intent: Intent
+    intent_confidence: float

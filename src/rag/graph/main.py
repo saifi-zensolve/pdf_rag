@@ -6,6 +6,7 @@ from src.logger import init_logger
 from src.pipeline.config import EMBEDDING_DIMENSION
 from src.pipeline.embedding import get_embeddings
 from src.pipeline.store import get_store
+from src.rag.node import classify_intent, route_by_intent
 from src.rag.state import State
 
 logger = init_logger(__name__)
@@ -99,15 +100,26 @@ def build_graph() -> CompiledStateGraph:
     """Build the state graph."""
     graph = StateGraph(State)
 
-    graph.add_node("retrieve_node", retrieve_node)
     graph.add_node("pre_guardrail_node", pre_guardrail_node)
+    graph.add_node("intent", classify_intent)
+
+    graph.add_node("retrieve_node", retrieve_node)
     graph.add_node("prompt_node", prompt_node)
     graph.add_node("llm_node", llm_node)
     graph.add_node("post_guardrail_node", post_guardrail_node)
 
-    graph.set_entry_point("retrieve_node")
-    graph.add_edge("retrieve_node", "pre_guardrail_node")
-    graph.add_edge("pre_guardrail_node", "prompt_node")
+    graph.add_node("reject_node", {"answer": "I don't know"})
+
+    graph.set_entry_point("pre_guardrail_node")
+
+    graph.add_edge("pre_guardrail_node", "intent")
+    graph.add_conditional_edges(
+        "intent",
+        route_by_intent,
+        {"sql": "retrieve_node", "vector": "retrieve_node", "reject": "reject_node"},
+    )
+
+    graph.add_edge("retrieve_node", "prompt")
     graph.add_edge("prompt_node", "llm_node")
     graph.add_edge("llm_node", "post_guardrail_node")
 
