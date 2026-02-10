@@ -26,13 +26,14 @@ def route_by_intent(state: State) -> str:
     elif intent == Intent.POLICY_STATUS:
         return "policy_status"
 
+
 def route_question(question: str):
     if not hard_gate(question):
         return "REJECT"
-    
+
     intent, _ = classify_intent(question)
 
     if intent == Intent.UNKNOWN:
         return "REJECT"
-    
+
     return ROUTING_TABLE.get(intent, "REJECT")

@@ -6,7 +6,7 @@ from src.logger import init_logger
 from src.pipeline.config import EMBEDDING_DIMENSION
 from src.pipeline.embedding import get_embeddings
 from src.pipeline.store import get_store
-from src.rag.node import classify_intent, route_by_intent
+from src.rag.node import classify_intent, route_by_intent, reject
 from src.rag.state import State
 
 logger = init_logger(__name__)
@@ -17,6 +17,8 @@ retriever = get_store(embedding=_embeddings, store_type="qdrant", dimensions=EMB
 
 
 def retrieve_node(state: State):
+    logger.info(f"***retrieve_node***")
+    logger.debug(f"state: {state}")
     docs = retriever.invoke(state["question"])
     return {"docs": docs}
 
@@ -32,8 +34,12 @@ def pre_guardrail_node(state: State):
     Args:
         state (State): The state of graph node.
     """
+    logger.info(f"***pre_guardrail_node***")
+    logger.debug(f"state: {state}")
     cleaned_docs = []
     seen = set()
+
+    print(f"docs={state}")
 
     for document in state["docs"]:
         text = (document.page_content or "").strip()
@@ -53,6 +59,8 @@ def pre_guardrail_node(state: State):
 
 
 def prompt_node(state: State):
+    logger.info(f"***prompt_node***")
+    logger.debug(f"state: {state}")
     context = "\n\n---\n\n".join(document.page_content for document in state["filtered_docs"])
 
     history_text = "\n\n---\n\n".join(
@@ -77,6 +85,8 @@ QUESTION:
 
 
 def llm_node(state: State):
+    logger.info(f"***llm_node***")
+    logger.debug(f"state: {state}")
     response = GPT_4_1_Mini().invoke_llm(state["prompt"])
     answer = response["content"]
 
@@ -89,6 +99,8 @@ def llm_node(state: State):
 
 
 def post_guardrail_node(state: State):
+    logger.info(f"***post_guardrail_node***")
+    logger.debug(f"state: {state}")
     answer = state["answer"].lower()
     if "based on the provided documents" not in answer and "i don't know" in answer:
         return state
@@ -97,6 +109,8 @@ def post_guardrail_node(state: State):
 
 
 def build_graph() -> CompiledStateGraph:
+    logger.info(f"***build_graph***")
+    logger.debug(f"state: {State}")
     """Build the state graph."""
     graph = StateGraph(State)
 
@@ -108,7 +122,7 @@ def build_graph() -> CompiledStateGraph:
     graph.add_node("llm_node", llm_node)
     graph.add_node("post_guardrail_node", post_guardrail_node)
 
-    graph.add_node("reject_node", {"answer": "I don't know"})
+    graph.add_node("reject_node", reject)
 
     graph.set_entry_point("pre_guardrail_node")
 
@@ -119,7 +133,7 @@ def build_graph() -> CompiledStateGraph:
         {"sql": "retrieve_node", "vector": "retrieve_node", "reject": "reject_node"},
     )
 
-    graph.add_edge("retrieve_node", "prompt")
+    graph.add_edge("retrieve_node", "prompt_node")
     graph.add_edge("prompt_node", "llm_node")
     graph.add_edge("llm_node", "post_guardrail_node")
 
